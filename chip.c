@@ -1,5 +1,6 @@
 #include "chip.h"
 #include <string.h>
+#include <stdio.h>
 
 const u8 fontset[80] = {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -20,10 +21,22 @@ const u8 fontset[80] = {
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-void init_cpu(CPU *cpu){
+void initCpu(CPU *cpu){
 	memset(cpu, 0, sizeof(CPU));
 	cpu->PC = 0x200;
 	for(int i = 0; i < 80; i++){
 		cpu->memory[0x050+i] = fontset[i];
 	}	
+}
+
+int loadRom(CPU *cpu, const char* filename){
+	FILE *fp = fopen(filename, "rb");
+	if(fp == NULL){
+		perror("Failed opening file. ");
+		return EXIT_FAILURE;
+	}
+
+
+
+	fclose();
 }
