@@ -1,6 +1,10 @@
 #include "chip.h"
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+const unsigned int START_ADR = 0x200;
+const size_t MAX_ROM_SIZE = 4096-512;
 
 const u8 fontset[80] = {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -23,20 +27,30 @@ const u8 fontset[80] = {
 
 void initCpu(CPU *cpu){
 	memset(cpu, 0, sizeof(CPU));
-	cpu->PC = 0x200;
+	cpu->PC = START_ADR;
 	for(int i = 0; i < 80; i++){
-		cpu->memory[0x050+i] = fontset[i];
+		cpu->mem[0x050+i] = fontset[i];
 	}	
 }
 
 int loadRom(CPU *cpu, const char* filename){
 	FILE *fp = fopen(filename, "rb");
 	if(fp == NULL){
-		perror("Failed opening file. ");
+		perror("Error opening file. ");
 		return EXIT_FAILURE;
 	}
 
+	size_t r = fread(&cpu->mem[START_ADR], 1, MAX_ROM_SIZE, fp);
+	if(r < MAX_ROM_SIZE){
+		if(ferror(fp)){
+			perror("Stream error occured during read.\n");
+		} else if(feof(fp)){
+			printf("End of file reached. Read %zu items.\n", r);
+		}
+	} else{
+		printf("Successfully read all %zu items.\n", MAX_ROM_SIZE);
+	}
 
-
-	fclose();
+	fclose(fp);
+	return EXIT_SUCCESS;
 }
