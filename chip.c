@@ -1,12 +1,9 @@
 #include "chip.h"
-#include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
-const unsigned int START_ADR = 0x200;
 const size_t MAX_ROM_SIZE = 4096-512;
 
-const u8 fontset[80] = {
+static const u8 fontset[80] = {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
 	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2

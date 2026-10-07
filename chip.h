@@ -3,10 +3,11 @@
 #define CHIP_H 
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 #define u8 uint8_t
 #define u16 uint16_t
-
-extern const u8 fontset[80];
+#define START_ADR 0x200
 
 typedef struct{
 	u8 V[16];			// 16 registers from V0 to VF
@@ -24,7 +25,7 @@ typedef struct{
 
 void initCpu(CPU *cpu);
 
-// load the binary game file to the memory
+// load the game file into the memory
 int loadRom(CPU *cpu, const char* filename);
 
 #endif
