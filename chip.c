@@ -51,3 +51,36 @@ int loadRom(CPU *cpu, const char* filename){
 	fclose(fp);
 	return EXIT_SUCCESS;
 }
+
+void cycle(CPU *cpu){
+	// fetch
+	u16 opcode = (cpu->mem[cpu->PC] << 8) | cpu->mem[cpu->PC+1];
+	cpu->PC += 2;
+
+	// decode
+	u8 fn = (opcode & 0xF000) >> 12;
+
+	u8 x = (opcode & 0x0F00) >> 8;	// register VX
+	u8 y = (opcode & 0x00F0) >> 4;	// register VY
+	u8 n = opcode & 0x000F;			// 4 bit number
+	u8 nn = opcode & 0x00FF;		// 8 bit number
+	u16 nnn = opcode & 0x0FFF;		// 12 bit number
+
+	// execute
+	switch(fn){
+		case 0x0:
+			// 00E0: clear screen
+			if(opcode == 0x00E0){
+				memset(cpu->display, 0, sizeof(cpu->display))
+			} else if(opcode == 0x00EE){
+			}
+			break;
+		case 0x1:
+			// 1NNN: jump to address nnn
+			cpu->PC = nnn;
+			break;	
+		case 0x2:
+			// 2NNN: calls subroutine
+
+	}
+}
