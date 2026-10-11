@@ -8,6 +8,8 @@
 #define u8 uint8_t
 #define u16 uint16_t
 #define START_ADR 0x200
+#define VX cpu->V[x]
+#define VY cpu->V[y]
 
 typedef struct{
 	u8 V[16];		// 16 registers from V0 to VF
@@ -32,6 +34,6 @@ int loadRom(CPU *cpu, const char* filename);
 // this is a bit tricky when i was first learning about this
 // tldr: after extracting each nibble (aka decoding it),
 // if the first nibble is 1, it is a jump instruction, and 1NNN will be its format
-void cycle(CPU *cpu)
+void cycle(CPU *cpu);
 
 #endif
