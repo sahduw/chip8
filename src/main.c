@@ -1,10 +1,17 @@
+#include <time.h>
+#include <raylib.h>
 #include "chip.h"
+
+const int scale = 10;
+const int clockspeed = 700 / 60;
 
 int main(int argc, char* argv[]){
 	if(argc != 2){
 		fprintf(stderr, "Usage: %s <path_to_ROM>\n", argv[0]);
 		return 1;
 	}
+
+	srand(time(NULL));
 	CPU chip;
 	initCpu(&chip);
 	if(loadRom(&chip, argv[1]) == EXIT_SUCCESS){
@@ -17,4 +24,27 @@ int main(int argc, char* argv[]){
 	} else{
 		printf("Failed to load ROM. ");
 	}
+
+	InitWindow(64*scale, 32*scale, "Chip 8 maybe");
+	SetTargetFPS(60);
+	while(!WindowShouldClose()){
+		for(int i = 0; i < clockspeed; i++){
+			cycle(&chip);
+		}
+		if(chip.delayReg > 0){
+			chip.delayReg--;
+		}
+		if(chip.soundReg > 0){
+			printf("\a");
+			chip.soundReg--;
+		}
+
+		BeginDrawing();
+
+		ClearBackground(BLACK);
+		
+		
+		EndDrawing();
+	}
+	CloseWindow();
 }

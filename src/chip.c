@@ -33,14 +33,14 @@ void initCpu(CPU *cpu){
 int loadRom(CPU *cpu, const char* filename){
 	FILE *fp = fopen(filename, "rb");
 	if(fp == NULL){
-		perror("Error opening file. ");
+		perror("Error opening file");
 		return EXIT_FAILURE;
 	}
 
 	size_t r = fread(&cpu->mem[START_ADR], 1, MAX_ROM_SIZE, fp);
 	if(r < MAX_ROM_SIZE){
 		if(ferror(fp)){
-			perror("Stream error occured during read.\n");
+			perror("Stream error occured during read");
 		} else if(feof(fp)){
 			printf("End of file reached. Read %zu items.\n", r);
 		}
@@ -127,43 +127,45 @@ void cycle(CPU *cpu){
 				case 3: // 8XY3
 					VX = VX ^ VY;
 					break;
-				case 4: // 8XY4
+				case 4: { // 8XY4
 					u16 sum = VX + VY;
 					if(sum > 255){
 						VX = sum;
-						cpu->V[F] = 1;
+						cpu->V[0xF] = 1;
 					} else{
 						VX = sum;
-						cpu->V[F] = 0;
+						cpu->V[0xF] = 0;
 					}
 					break;
+				}
 				case 5: // 8XY5
 					if(VX >= VY){
-						cpu->V[F] = 1;
+						cpu->V[0xF] = 1;
 						VX -= VY;
 					} else{
-						cpu->V[F] = 0;
+						cpu->V[0xF] = 0;
 						VX -= VY;
 					}
 					break;
 				case 6: // 8XY6
-					cpu->V[F] = VX & 1;
+					cpu->V[0xF] = VX & 1;
 					VX >>= 1;
 					break;
 				case 7: //8XY7
 					if(VY >= VX){
-						cpu->[F] = 1;
-						VY -= VX;
+						cpu->V[0xF] = 1;
+						VX = VY - VX;
 					} else{
-						cpu->[F] = 0;
-						VY -= VX;
+						cpu->V[0xF] = 0;
+						VX = VY - VX;
 					}
 					break;
-				case E: // 8XYE
-					cpu->V[F] = (VX & 0x80) >> 7;
+				case 0xE: // 8XYE
+					cpu->V[0xF] = (VX & 0x80) >> 7;
 					VX <<= 1;
 					break;
 			}
+			break;
 		case 0x9:
 			// 9XY0: opposite of 5XY0
 			if(VX != VY){
@@ -177,9 +179,40 @@ void cycle(CPU *cpu){
 		case 0xB:
 			// BNNN: jump to nnn plus address in V0
 			cpu->PC = nnn + cpu->V[0];
+			break;
 		case 0xC:
 			// CXNN: random number
-			VX = (rand() % 255) & nn;
+			VX = (rand() % 256) & nn;
 			break;
+
+		case 0xD: {
+			// DXYN: display
+			// this is so confusing, i had to look it up multiple times
+			int lx = VX % 64;
+			int ly = VY % 32;
+			cpu->V[0xF] = 0;
+			for(int i = 0; i < n; i++){
+				// if y+i is larger than 32, it will be clipped
+				if((ly+i) >= 32){
+					break;
+				}
+				u8 spriteRow = cpu->mem[cpu->I + i];
+				for(int j = 7; j >= 0; j--){
+					// if x+j >= 64, it will be clipped, but not the ones after
+					if((lx+j) >= 64){
+						continue;
+					}
+					u8 spritePixel = (spriteRow >> j) & 1;
+					if(spritePixel){
+						int index = (ly+i)*64 + lx+(7-j);
+						if(cpu->display[index] == 1){
+							cpu->V[0xF] = 1;
+						}
+						cpu->display[index] ^= 1;
+					}
+				}
+			}
+			break;
+		}
 	}
 }
