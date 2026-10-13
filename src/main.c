@@ -42,8 +42,16 @@ int main(int argc, char* argv[]){
 		BeginDrawing();
 
 		ClearBackground(BLACK);
-		
-		
+
+		// grid logic
+		for(int y = 0; y < 32; y++){
+			for(int x = 0; x < 64; x++){
+				if(chip.display[y*64+x] == 1){
+					DrawRectangle(x*scale, y*scale, scale, scale, WHITE);
+				}
+			}
+		}
+
 		EndDrawing();
 	}
 	CloseWindow();
